@@ -1,25 +1,43 @@
-import 'dotenv/config';
+// Main News Page Component
+async function renderMainNewsPage(container) {
+    // Clear container
+    container.innerHTML = '';
+    
+    // Create page title
+    const title = document.createElement('h1');
+    title.className = 'page-title';
+    title.textContent = 'חדשות עדכניות';
+    container.appendChild(title);
 
-const root = document.getElementById('root');
-const main = document.createElement('main');
-const pages = ['add news', 'news'];
-
-root.appendChild(GetNavBar(pages))
-root.appendChild(main);
-
-function LoadPage(pageName = "news") {
-    main.innerHTML = '';
-    let page;
-    switch (pageName) {
-        case 'news':
-            page = NewsPage();
-            break;
-        case 'add news':
-            page = GetStory();
-            break;
-        default:
-            page = NewsPage();
-            break;
+    // Show loading while fetching news
+    if (newsData.length === 0) {
+        const loading = document.createElement('div');
+        loading.className = 'loading';
+        loading.innerHTML = '<div class="spinner"></div>טוען חדשות...';
+        container.appendChild(loading);
+        
+        // Load news data
+        try {
+            const apiNews = await fetchNews();
+            const userStories = getUserStories();
+            newsData = [...userStories, ...apiNews]; // User stories first
+            
+            // Re-render without loading
+            renderMainNewsPage(container);
+        } catch (error) {
+            console.error('Error loading news:', error);
+            loading.innerHTML = 'שגיאה בטעינת החדשות. נסה שוב מאוחר יותר.';
+        }
+        return;
     }
-    main.appendChild(page);
+
+    // Create and append news grid
+    const grid = createNewsGrid(newsData);
+    container.appendChild(grid);
+}
+
+// Show news page
+function showMainNewsPage() {
+    const main = document.getElementById('main-content');
+    renderMainNewsPage(main);
 }
